@@ -28,9 +28,24 @@ public class CarController {
     return carRepository.findById(id).orElseThrow(() -> new CarNotFoundException(id));
   }
 
-  @GetMapping("/car/year/{year}")
+  @GetMapping("/cars/year/{year}")
   public List<Car> findByYear(@PathVariable int year) {
     return carRepository.findAll().stream().filter(car -> car.getYear() == year).collect(Collectors.toList());
   }
 
+  @PostMapping("/cars/upload")
+  public List<Car> uploadData(@RequestBody List<Car> newCars) {
+    CarLog message = new CarLog("Data Loaded Successfully");
+    rabbitTemplate.convertAndSend(CarsApplication.QUEUE_NAME, message.toString());
+    return carRepository.saveAll(newCars);
+  }
+
+  @DeleteMapping("/cars/delete/{id}")
+  public Car deleteCar(@PathVariable Long id) {
+    Car car = carRepository.findById(id).orElseThrow(() -> new CarNotFoundException(id));
+    carRepository.delete(car);
+    CarLog message = new CarLog("{" + id + "} Data Deleted");
+    rabbitTemplate.convertAndSend(CarsApplication.QUEUE_NAME, message.toString());
+    return car;
+  }
 }

@@ -16,7 +16,7 @@ public class Car {
   private int year;
 
 
-  public Car() {
+  public Car(String data_loaded_successfully) {
     // default constructor
   }
 
